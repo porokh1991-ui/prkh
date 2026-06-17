@@ -189,6 +189,23 @@ body {
 .profile-pill span { font-size: 0.85rem; font-weight: 600; }
 
 /* ═══════════════════════════════════════════
+   AUTH OVERLAY
+═══════════════════════════════════════════ */
+.auth-input {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.auth-input:focus { border-color: var(--orange); }
+
+/* ═══════════════════════════════════════════
    BOTTOM NAV
 ═══════════════════════════════════════════ */
 .bottom-nav {

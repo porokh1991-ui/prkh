@@ -1,10 +1,11 @@
-const CACHE_NAME = 'prkh-v21';
+const CACHE_NAME = 'prkh-v22';
 const CACHE_FILES = [
   './',
   './index.html',
   './styles.css',
   './i18n.js',
   './app.js',
+  './firebase.js',
   './manifest.json'
 ];
 

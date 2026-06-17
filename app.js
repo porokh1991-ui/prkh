@@ -285,9 +285,14 @@ const EXERCISE_LIBRARY = {
 const AVATAR_COLORS = ['#ff6b35','#00d4aa','#7b2fbe','#e91e8c','#ffd700','#00aaff','#ff4757','#2ed573'];
 
 function getData() {
-  return JSON.parse(localStorage.getItem('fitpro_data') || '{"profiles":[],"activeProfile":null}');
+  const key = 'fitpro_data' + (window.currentUid ? '_' + window.currentUid : '');
+  return JSON.parse(localStorage.getItem(key) || '{"profiles":[],"activeProfile":null}');
 }
-function saveData(d) { localStorage.setItem('fitpro_data', JSON.stringify(d)); }
+function saveData(d) {
+  const key = 'fitpro_data' + (window.currentUid ? '_' + window.currentUid : '');
+  localStorage.setItem(key, JSON.stringify(d));
+  if (typeof window.fbSyncToCloud === 'function') window.fbSyncToCloud(d);
+}
 
 function getProfile() {
   const d = getData();
@@ -1272,8 +1277,13 @@ function renderProfileTab() {
       </div>
 
 
+      <!-- Terminar sessão -->
+      <div style="text-align:center;margin-top:6px;">
+        <button onclick="fbLogout()" style="background:none;border:1px solid rgba(255,71,87,0.3);border-radius:20px;padding:8px 20px;color:rgba(255,71,87,0.7);font-size:0.8rem;cursor:pointer;">Terminar sessão</button>
+      </div>
+
       <!-- Zona de perigo -->
-      <div style="text-align:center;padding-bottom:40px;margin-top:6px;">
+      <div style="text-align:center;padding-bottom:40px;margin-top:10px;">
         <button onclick="confirmDeleteProfile()" style="background:none;border:none;color:var(--muted);font-size:0.75rem;cursor:pointer;text-decoration:underline;opacity:0.6;">${t('profile_delete')}</button>
       </div>
 
@@ -7097,18 +7107,16 @@ function onboardingSkip() {
 //  INIT
 // ═══════════════════════════════════════════════════════
 
-(function init() {
+window.initAppAfterAuth = function() {
   const d = getData();
   if (d.activeProfile && d.profiles.find(p => p.id === d.activeProfile)) {
-    // Profile already active — hide selection screen immediately, launch app
     document.getElementById('profile-screen').style.display = 'none';
     if (typeof hideHomeLangPicker === 'function') hideHomeLangPicker();
     launchApp();
   } else {
-    // No profile — show selection screen
     renderProfileScreen();
   }
-})();
+};
 
 // ─── Nav bar scroll-shrink (Instagram style) ──────────────────────
 (function() {
