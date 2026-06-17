@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prkh-v22';
+const CACHE_NAME = 'prkh-v23';
 const CACHE_FILES = [
   './',
   './index.html',
@@ -29,17 +29,36 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: cache-first with network fallback
+// Fetch:
+//  - HTML / navigation  -> network-first (sempre a versão mais recente quando há net)
+//  - resto dos assets   -> cache-first com fallback à net
 self.addEventListener('fetch', event => {
+  const req = event.request;
+  const isHTML = req.mode === 'navigate' ||
+                 (req.headers.get('accept') || '').includes('text/html');
+
+  if (isHTML) {
+    event.respondWith(
+      fetch(req).then(response => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        return response;
+      }).catch(() =>
+        caches.match(req).then(c => c || caches.match('./index.html'))
+      )
+    );
+    return;
+  }
+
   event.respondWith(
-    caches.match(event.request).then(cached => {
+    caches.match(req).then(cached => {
       if (cached) return cached;
-      return fetch(event.request).then(response => {
+      return fetch(req).then(response => {
         if (!response || response.status !== 200 || response.type === 'opaque') {
           return response;
         }
         const responseClone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseClone));
+        caches.open(CACHE_NAME).then(cache => cache.put(req, responseClone));
         return response;
       });
     })
