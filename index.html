@@ -2,14 +2,16 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>PRKH – Personal Trainer</title>
-  <link rel="stylesheet" href="styles.css?v=22">
+  <link rel="stylesheet" href="styles.css?v=23">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff6b35">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="PRKH">
+  <link rel="apple-touch-icon" href="icon-180.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
 </head>
 <body>
 
@@ -615,8 +617,8 @@
     <div style="font-size:2.6rem;font-weight:900;color:var(--orange);letter-spacing:-0.02em;margin-bottom:2px;">PRKH</div>
     <div style="font-size:0.65rem;letter-spacing:0.14em;color:var(--orange);font-weight:600;text-transform:uppercase;opacity:0.7;margin-bottom:36px;">Precision · Results · Knowledge · Habits</div>
     <div id="auth-title" style="font-size:1.5rem;font-weight:800;margin-bottom:24px;align-self:flex-start;">Entrar</div>
-    <input id="auth-email" type="email" placeholder="Email" autocomplete="email" class="auth-input" />
-    <input id="auth-pass" type="password" placeholder="Password" autocomplete="current-password" class="auth-input" style="margin-top:10px;" />
+    <input id="auth-email" type="email" placeholder="Email" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" class="auth-input" />
+    <input id="auth-pass" type="password" placeholder="Password" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" class="auth-input" style="margin-top:10px;" />
     <div id="auth-error" style="color:#ff4757;font-size:0.82rem;min-height:20px;margin-top:6px;align-self:flex-start;"></div>
     <button id="auth-submit-btn" onclick="fbSubmitAuth()" class="btn btn-primary btn-full" style="margin-top:10px;padding:15px;font-size:1rem;font-weight:800;border-radius:14px;">Entrar</button>
     <button onclick="toggleAuthMode()" id="auth-toggle-link" style="background:none;border:none;color:var(--muted);font-size:0.84rem;cursor:pointer;padding:14px 8px;opacity:0.7;">Ainda não tens conta? Registar</button>

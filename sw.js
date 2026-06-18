@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prkh-v23';
+const CACHE_NAME = 'prkh-v24';
 const CACHE_FILES = [
   './',
   './index.html',
@@ -6,7 +6,10 @@ const CACHE_FILES = [
   './i18n.js',
   './app.js',
   './firebase.js',
-  './manifest.json'
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-180.png'
 ];
 
 // Install: cache core files
