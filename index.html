@@ -2,9 +2,9 @@
 <html lang="pt">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <title>PRKH – Personal Trainer</title>
-  <link rel="stylesheet" href="styles.css?v=23">
+  <link rel="stylesheet" href="styles.css?v=26">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff6b35">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -537,7 +537,7 @@
 </div>
 
 <!-- ═══ REST TIMER FLOAT ═══ -->
-<div id="rest-timer-float" style="display:none;position:fixed;bottom:calc(64px + env(safe-area-inset-bottom));left:0;right:0;z-index:200;padding:0 12px;pointer-events:none;">
+<div id="rest-timer-float" style="display:none;position:fixed;bottom:calc(64px + env(safe-area-inset-bottom) + var(--kb-offset, 0px));left:0;right:0;z-index:200;padding:0 12px;pointer-events:none;">
   <div style="background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px 16px;
               box-shadow:0 -4px 32px rgba(0,0,0,0.5);pointer-events:all;">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
@@ -547,15 +547,15 @@
     <div style="display:flex;align-items:center;gap:16px;">
       <div id="rest-timer-display" style="font-size:2.6rem;font-weight:900;font-variant-numeric:tabular-nums;min-width:80px;">1:00</div>
       <div style="flex:1;">
-        <div style="height:4px;background:rgba(255,255,255,0.08);border-radius:2px;margin-bottom:8px;overflow:hidden;">
-          <div id="rest-timer-bar" style="height:100%;background:var(--green);border-radius:2px;width:100%;transition:width 0.9s linear;"></div>
+        <div style="height:9px;background:rgba(255,255,255,0.22);border-radius:5px;margin-bottom:8px;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12);">
+          <div id="rest-timer-bar" style="height:100%;background:var(--green);border-radius:5px;width:100%;transition:width 0.9s linear;box-shadow:0 0 8px rgba(0,212,170,0.5);"></div>
         </div>
         <div style="display:flex;gap:5px;flex-wrap:wrap;">
-          <button onclick="startRestTimer(30)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">30s</button>
-          <button onclick="startRestTimer(60)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">1m</button>
-          <button onclick="startRestTimer(90)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">1m30</button>
-          <button onclick="startRestTimer(120)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">2m</button>
-          <button onclick="startRestTimer(180)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">3m</button>
+          <button data-rest="30" onclick="startRestTimer(30)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">30s</button>
+          <button data-rest="60" onclick="startRestTimer(60)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">1m</button>
+          <button data-rest="90" onclick="startRestTimer(90)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">1m30</button>
+          <button data-rest="120" onclick="startRestTimer(120)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">2m</button>
+          <button data-rest="180" onclick="startRestTimer(180)" style="flex:1;min-width:36px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:8px;color:var(--muted);font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">3m</button>
           <button onclick="stopRestTimer()" style="flex:1;min-width:44px;background:rgba(255,71,87,0.1);border:1px solid rgba(255,71,87,0.3);border-radius:8px;color:#ff4757;font-size:0.7rem;font-weight:700;padding:4px 2px;cursor:pointer;">Saltar</button>
         </div>
       </div>
@@ -625,18 +625,40 @@
   </div>
 </div>
 
-<script src="i18n.js?v=22"></script>
+<script src="i18n.js?v=25"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase.js?v=1"></script>
-<script src="app.js?v=22"></script>
+<script src="app.js?v=26"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
       navigator.serviceWorker.register('./sw.js').catch(err => console.warn('SW:', err));
     });
   }
+
+  // Corrige o bug do Chrome/Android em que a barra de navegação fixa
+  // ("position:fixed; bottom:0") fica "presa" a meio do ecrã quando o
+  // teclado abre ou a barra de endereço do Chrome esconde/aparece.
+  // Reancora os elementos fixos ao fundo do viewport visível real.
+  (function () {
+    if (!window.visualViewport) return;
+    const vv = window.visualViewport;
+    let raf = null;
+    function reposition() {
+      raf = null;
+      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty('--kb-offset', offset + 'px');
+    }
+    function schedule() {
+      if (raf) return;
+      raf = requestAnimationFrame(reposition);
+    }
+    vv.addEventListener('resize', schedule);
+    vv.addEventListener('scroll', schedule);
+    reposition();
+  })();
 </script>
 </body>
 </html>

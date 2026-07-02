@@ -191,6 +191,8 @@ const EXERCISE_LIBRARY = {
     'Pull Over c/ Halteres','Pull Over na Polia','Supino Neutro c/ Halteres','Chest Press na Máquina',
     'Fly na Máquina','Dips (Mergulho no Banco)',
     'Press de Peito c/ Elástico','Fly c/ Elástico','Flexão c/ Elástico',
+    'Supino Reto na Smith Machine','Crossover na Polia Baixa','Crossover na Polia Alta','Supino Máquina Convergente',
+    'Flexão Diamante','Flexão Archer','Flexão Explosiva (Pliométrica)','Flexão com Elevação de Perna',
   ],
   'Costas': [
     'Puxada Frente c/ Barra','Puxada Frente c/ Triângulo','Puxada Aberta','Puxada com Pegada Neutra',
@@ -199,6 +201,8 @@ const EXERCISE_LIBRARY = {
     'Pull-down com Corda','Barra Fixa','Barra Fixa Supinada','Straight-arm Pulldown',
     'Hiperextensão Lombar','Face Pull','Remada Alta','Good Morning',
     'Remada c/ Elástico','Puxada c/ Elástico','Face Pull c/ Elástico','Remada Baixa c/ Elástico',
+    'Remada Cavalinho c/ Barra (T-Bar)','Puxada Neutra na Máquina','Remada Baixa na Polia','Levantamento Terra Sumô c/ Barra',
+    'Superman','Remada Invertida (Australian Pull-up)','Remada TRX','Remada com Toalha na Porta',
   ],
   'Pernas': [
     'Agachamento Livre','Agachamento Goblet','Agachamento Frontal','Agachamento Búlgaro',
@@ -208,6 +212,8 @@ const EXERCISE_LIBRARY = {
     'Panturrilha em Pé','Panturrilha Sentado','Panturrilha no Leg Press','Cadeira Adutora',
     'Cadeira Abdutora','Step-up','Sissy Squat','Wall Sit',
     'Agachamento c/ Elástico','Leg Curl c/ Elástico','Passada c/ Elástico','Monster Walk c/ Elástico',
+    'Agachamento na Smith Machine','Multi Hip na Máquina','Leg Press Unilateral','Extensão de Quadril no Cabo',
+    'Pistol Squat','Agachamento Salto (Jump Squat)','Afundo Caminhando (Walking Lunge)','Agachamento Sumô Peso Corporal',
   ],
   'Ombros': [
     'Desenvolvimento c/ Barra (à frente)','Desenvolvimento c/ Barra (atrás)','Desenvolvimento c/ Halteres',
@@ -217,6 +223,8 @@ const EXERCISE_LIBRARY = {
     'Face Pull na Polia','Crucifixo Invertido c/ Halteres','Crucifixo Invertido na Máquina',
     'Rotação Interna na Polia','Rotação Externa na Polia','Upright Row c/ Barra','Upright Row c/ Halteres',
     'Elevação Lateral c/ Elástico','Desenvolvimento c/ Elástico','Elevação Frontal c/ Elástico','Rotação Externa c/ Elástico',
+    'Desenvolvimento na Smith Machine','Elevação Lateral na Máquina','Remada Alta na Polia',
+    'Pike Push-up','Flexão Pike na Parede (Handstand Assistido)','Elevação Lateral com Garrafas de Água',
   ],
   'Bíceps': [
     'Rosca Direta c/ Barra','Rosca Direta c/ Barra EZ','Rosca Alternada c/ Halteres',
@@ -225,6 +233,8 @@ const EXERCISE_LIBRARY = {
     'Rosca Inclinada c/ Halteres','Rosca 21','Rosca Cabo c/ Corda','Curl Isométrico',
     'Chin-up (Barra Supinada)','Rosca Spider','Rosca com Elástico',
     'Rosca Martelo c/ Elástico','Rosca Bíceps c/ Elástico (Pé no Elástico)',
+    'Rosca na Máquina','Rosca Scott na Polia','Rosca Drag c/ Barra',
+    'Rosca com Mochila com Peso','Rosca Isométrica na Parede',
   ],
   'Tríceps': [
     'Tríceps Corda na Polia','Tríceps Polia Alta c/ Barra','Tríceps Francês c/ Barra EZ',
@@ -233,6 +243,8 @@ const EXERCISE_LIBRARY = {
     'Kickback na Polia','Close Grip Bench Press','Tríceps Coice','Tríceps Polia Inversa',
     'Skullcrusher','Extensão Unilateral na Polia','Press de Tríceps na Máquina',
     'Tríceps com Elástico','Kickback c/ Elástico','Extensão de Tríceps c/ Elástico',
+    'Tríceps na Máquina Convergente','Supino Fechado na Smith Machine',
+    'Dips entre Duas Cadeiras','Extensão de Tríceps na Parede',
   ],
   'Abdômen': [
     'Abdominal Crunch','Crunch Invertido','Crunch na Máquina','Prancha Frontal',
@@ -242,6 +254,8 @@ const EXERCISE_LIBRARY = {
     'Russian Twist','Russian Twist c/ Peso','Oblíquo c/ Halter','Oblíquo na Polia',
     'Mountain Climber','Dead Bug','Sit-up','V-up','Dragon Flag',
     'Pallof Press c/ Elástico','Crunch c/ Elástico',
+    'Abdominal na Polia Alta','Crunch na Máquina de Rotação',
+    'Prancha com Elevação de Perna','Flutter Kicks','Bicicleta Lenta (Slow Bicycle)',
   ],
   'Glúteos': [
     'Hip Thrust c/ Barra','Hip Thrust c/ Halteres','Hip Thrust na Máquina',
@@ -251,6 +265,8 @@ const EXERCISE_LIBRARY = {
     'Stiff c/ Foco Glúteo','Leg Press c/ Foco Glúteo','Glute Kickback na Polia',
     'Elevação Pélvica c/ Elástico','Agachamento com Elástico','Ponte de Glúteos',
     'Hip Thrust c/ Elástico','Passada Lateral c/ Elástico','Donkey Kick c/ Elástico','Clamshell c/ Elástico',
+    'Coice de Glúteo no Cabo Baixo','Abdução de Quadril na Polia',
+    'Ponte Unilateral de Glúteos','Frog Pump (Elevação de Quadril Borboleta)',
   ],
   'Alongamentos': [
     // Pescoço
@@ -279,6 +295,10 @@ const EXERCISE_LIBRARY = {
     // Mobilidade Geral
     'World\'s Greatest Stretch','Hip 90/90','Abertura de Anca em Círculo',
     'Rotação Torácica','Thread the Needle',
+    // Extra
+    'Alongamento de Trapézio','Alongamento de Punho e Antebraço','Postura da Esfinge (Sphinx Pose)',
+    'Círculos de Braço (Arm Circles)','Postura do Gato Esticado (Extended Puppy Pose)',
+    'Alongamento de Adutores em Pé','Torção de Tronco em Pé',
   ],
 };
 
@@ -4085,21 +4105,34 @@ function collapseExSection(muscle) {
   renderExerciseBrowser(getProfile());
 }
 
+// Insere o exercício logo a seguir ao último do mesmo grupo muscular
+// (mantém os exercícios de tríceps juntos, peito juntos, etc.).
+function insertExerciseGrouped(exObj) {
+  let lastIdx = -1;
+  for (let i = 0; i < workoutExercises.length; i++) {
+    if (workoutExercises[i].muscle === exObj.muscle) lastIdx = i;
+  }
+  if (lastIdx < 0) { workoutExercises.push(exObj); return; }
+  // não partir uma supersérie: avança até ao fim da cadeia ligada
+  while (workoutExercises[lastIdx] && workoutExercises[lastIdx].linkNext) lastIdx++;
+  workoutExercises.splice(lastIdx + 1, 0, exObj);
+}
+
 function toggleExerciseCard(name, muscle, cardEl) {
   const idx = workoutExercises.findIndex(e => e.name === name);
   if (idx >= 0) {
     workoutExercises.splice(idx, 1);
-    cardEl.classList.remove('added');
-    cardEl.querySelector('.ex-card-btn').textContent = '+';
-    cardEl.querySelector('.ex-card-btn').classList.add('add');
   } else {
-    workoutExercises.push({ name, muscle, sets: [{ reps: 12, weight: 0 }] });
-    cardEl.classList.add('added');
-    cardEl.querySelector('.ex-card-btn').textContent = '✔';
-    cardEl.querySelector('.ex-card-btn').classList.remove('add');
+    insertExerciseGrouped({ name, muscle, sets: [{ reps: 12, weight: 0 }] });
+    if (!workoutSelectedMuscles.includes(muscle)) workoutSelectedMuscles.push(muscle);
   }
+  // Re-renderiza o browser inteiro (garante que o estado ✔/+ está sempre
+  // correto — evita o bug de "às vezes não consigo adicionar").
+  const y = window.scrollY;
+  renderExerciseBrowser(getProfile());
   renderWorkoutList();
   updateWorkoutSummary();
+  window.scrollTo(0, y);
 }
 
 function updateWorkoutSummary() {
@@ -4182,7 +4215,7 @@ function addExFromPicker(name, muscle) {
       reps: config.repsPattern[Math.min(i, config.repsPattern.length - 1)],
       weight: 0,
     }));
-    workoutExercises.push({ name, muscle, sets });
+    insertExerciseGrouped({ name, muscle, sets });
     if (!workoutSelectedMuscles.includes(muscle)) workoutSelectedMuscles.push(muscle);
   }
   renderExPicker();
@@ -4487,7 +4520,7 @@ function renderWorkoutList() {
             style="flex:1;background:rgba(255,107,53,.08);color:var(--orange);border:1px dashed rgba(255,107,53,.3);border-radius:6px;padding:6px;cursor:pointer;font-size:0.8rem;font-weight:600;">
             ${t('workout_add_series')}
           </button>
-          <button onclick="startRestTimer(${profile.defaultRest||90})"
+          <button onclick="startRestTimer()"
             style="background:rgba(0,212,170,0.08);color:var(--green);border:1px solid rgba(0,212,170,0.25);
                    border-radius:6px;padding:6px 10px;cursor:pointer;font-size:0.78rem;font-weight:700;white-space:nowrap;">
             ⏱ ${t('dash_rest_label')}
@@ -6766,13 +6799,19 @@ function setTrimester(val) {
 let _restTimerInterval = null;
 let _restTimerTotal = 60;
 let _restTimerRemaining = 60;
+let _lastRestSeconds = parseInt(localStorage.getItem('prkh_last_rest') || '', 10) || 90;
 
 function startRestTimer(seconds) {
+  // Sem argumento → usa o último tempo escolhido (relembrado).
+  if (!seconds) seconds = _lastRestSeconds;
+  _lastRestSeconds = seconds;
+  try { localStorage.setItem('prkh_last_rest', String(seconds)); } catch (e) {}
   if (_restTimerInterval) clearInterval(_restTimerInterval);
   _restTimerTotal = seconds;
   _restTimerRemaining = seconds;
   const el = document.getElementById('rest-timer-float');
   if (el) el.style.display = 'block';
+  _highlightRestPreset(seconds);
   _updateRestTimerUI();
   _restTimerInterval = setInterval(() => {
     _restTimerRemaining--;
@@ -6806,6 +6845,16 @@ function stopRestTimer() {
   _restTimerInterval = null;
   const el = document.getElementById('rest-timer-float');
   if (el) el.style.display = 'none';
+}
+
+// Realça o botão de preset correspondente ao tempo relembrado
+function _highlightRestPreset(sec) {
+  document.querySelectorAll('#rest-timer-float button[data-rest]').forEach(b => {
+    const on = parseInt(b.getAttribute('data-rest'), 10) === sec;
+    b.style.background = on ? 'rgba(0,212,170,0.22)' : 'rgba(255,255,255,0.06)';
+    b.style.borderColor = on ? 'var(--green)' : 'var(--border)';
+    b.style.color = on ? 'var(--green)' : 'var(--muted)';
+  });
 }
 
 // ═══════════════════════════════════════════════════════
