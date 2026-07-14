@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <title>PRKH – Personal Trainer</title>
-  <link rel="stylesheet" href="styles.css?v=30">
+  <link rel="stylesheet" href="styles.css?v=32">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff6b35">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -375,7 +375,7 @@
     <div class="modal-title" id="modal-day-title">Segunda-feira</div>
     <p style="font-size:0.85rem; color:var(--muted); margin-bottom:14px;">Escolha os grupos musculares (ou deixe vazio para descanso).</p>
     <div class="chip-row" id="modal-muscle-chips" style="margin-bottom:16px;"></div>
-    <div id="modal-template-picker" style="margin-bottom:16px;"></div>
+    <div id="modal-day-exercises" style="margin-bottom:16px;max-height:42vh;overflow-y:auto;"></div>
     <div style="display:flex; gap:10px;">
       <button class="btn btn-secondary btn-full" onclick="closeModal('modal-day-muscles')">Cancelar</button>
       <button class="btn btn-primary btn-full" onclick="saveDayMuscles()">Guardar</button>
@@ -608,12 +608,12 @@
   </div>
 </div>
 
-<script src="i18n.js?v=28"></script>
+<script src="i18n.js?v=32"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase.js?v=1"></script>
-<script src="app.js?v=30"></script>
+<script src="app.js?v=32"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

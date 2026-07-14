@@ -612,6 +612,13 @@ function goToWorkout() {
   if (!profile) return;
   const today = new Date().getDay();
 
+  // 0. Prefer per-day custom exercise plan (sugestão editada no planeamento)
+  const dayPlan = profile.weeklyWorkoutPlan && profile.weeklyWorkoutPlan[today];
+  if (dayPlan && dayPlan.length) {
+    loadPlannedWorkout(dayPlan);
+    return;
+  }
+
   // 1. Prefer explicitly planned template for today
   const plannedTemplateId = profile.weeklyTemplatePlan && profile.weeklyTemplatePlan[today];
   if (plannedTemplateId) {
@@ -1514,12 +1521,15 @@ function renderDashboard() {
   if (tmrCard) {
     const tomorrow = (dayOfWeek + 1) % 7;
     const tomorrowMuscles = profile.weeklyPlan[tomorrow] || [];
+    const tomorrowPlan = (profile.weeklyWorkoutPlan && profile.weeklyWorkoutPlan[tomorrow]) || null;
+    const planBadge = (tomorrowPlan && tomorrowPlan.length)
+      ? `<span style="color:var(--orange);font-weight:700;"> · ${tomorrowPlan.length} ${t('exercises_label')}</span>` : '';
     tmrCard.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
         <div style="min-width:0;">
           <div class="section-title" style="margin-bottom:4px;">${t('dash_tomorrow_title')} · ${_dayFull(tomorrow)}</div>
           <div style="font-size:0.82rem;color:${tomorrowMuscles.length ? 'var(--text)' : 'var(--muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
-            ${tomorrowMuscles.length ? tomorrowMuscles.map(m => tMuscle(m)).join(', ') : t('plan_rest_day_msg')}
+            ${tomorrowMuscles.length ? tomorrowMuscles.map(m => tMuscle(m)).join(', ') + planBadge : t('plan_rest_day_msg')}
           </div>
         </div>
         <button onclick="openDayModal(${tomorrow})"
@@ -1567,6 +1577,7 @@ function renderDashboard() {
 let plannerSelectedDay = null;
 let plannerSelectedMuscles = [];
 let _plannerSelectedTemplate = null;
+let plannerExercises = []; // sugestão editável de exercícios para o dia a planear
 
 // ─── Split i18n lookup maps ────────────────────────────────────────
 const _SPLIT_DESCS_GYM = {
@@ -1907,8 +1918,40 @@ function renderPlannerDetail(day) {
 
   const muscleChips = muscles.map(m => `<span class="muscle-chip selected" style="font-size:0.78rem;">${tMuscle(m)}</span>`).join('');
 
+  const savedPlan = (profile.weeklyWorkoutPlan && profile.weeklyWorkoutPlan[day]) || null;
+
   let suggestionHTML = '';
-  if (tpl) {
+  if (savedPlan && savedPlan.length) {
+    // Plano editado pelo utilizador para este dia
+    const exRows = savedPlan.map(ex => {
+      const isRisky = avoidSet.has(ex.name);
+      return `<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div>
+          <span style="font-size:0.82rem; font-weight:600; color:${isRisky ? '#ff4757' : 'var(--text)'};">${ex.name}</span>
+          ${isRisky ? `<span style="font-size:0.65rem; color:#ff4757; background:rgba(255,71,87,.12); border:1px solid rgba(255,71,87,.3); border-radius:20px; padding:1px 6px; margin-left:5px;">${t('plan_injury_badge')}</span>` : ''}
+        </div>
+        <span style="font-size:0.72rem; color:var(--muted);">${ex.sets.length} ${t('sets_label')} · ${ex.sets[0].reps} ${t('workout_reps')}</span>
+      </div>`;
+    }).join('');
+    suggestionHTML = `
+      <div style="background:rgba(255,107,53,.06); border:1.5px solid rgba(255,107,53,.25); border-radius:var(--radius-sm); padding:14px; margin-top:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+          <div style="font-size:0.72rem; color:var(--orange); font-weight:800; text-transform:uppercase; letter-spacing:.6px;">${t('plan_suggested_workout')}</div>
+          <span style="font-size:0.72rem; color:var(--muted);">${savedPlan.length} ${t('exercises_label')}</span>
+        </div>
+        <div style="max-height:220px; overflow-y:auto; margin-bottom:12px;">${exRows}</div>
+        <div style="display:flex; gap:8px;">
+          <button onclick="startPlannedWorkout(${day})"
+            style="flex:1; background:var(--orange); color:#fff; border:none; border-radius:var(--radius-sm); padding:10px; font-size:0.85rem; font-weight:700; cursor:pointer;">
+            ${t('plan_start_workout')}
+          </button>
+          <button onclick="openDayModal(${day})"
+            style="flex:1; background:rgba(255,255,255,0.06); color:var(--text); border:1px solid var(--border); border-radius:var(--radius-sm); padding:10px; font-size:0.85rem; font-weight:600; cursor:pointer;">
+            ${t('plan_customize')}
+          </button>
+        </div>
+      </div>`;
+  } else if (tpl) {
     const exRows = tpl.exercises.map(ex => {
       const isRisky = avoidSet.has(ex.name);
       return `<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
@@ -2007,11 +2050,45 @@ function customisePlannerDay(day) {
   goToWorkout();
 }
 
+// Carrega uma lista de exercícios planeados para a sessão de treino ativa
+function loadPlannedWorkout(list) {
+  const profile = getProfile();
+  workoutExercises = list.map(e => ({ name: e.name, muscle: e.muscle, sets: e.sets.map(s => ({ ...s })) }));
+  workoutSelectedMuscles = [...new Set(list.map(e => e.muscle))];
+  activeTemplateId = null;
+  _browserVisible = false;
+  renderWorkoutTemplatePills();
+  renderWorkoutMuscleChips(profile);
+  renderExerciseBrowser(profile);
+  renderWorkoutList();
+  updateWorkoutSummary();
+}
+
+// Inicia o treino planeado para um dia específico (a partir do planeador)
+function startPlannedWorkout(day) {
+  const profile = getProfile();
+  const list = profile.weeklyWorkoutPlan && profile.weeklyWorkoutPlan[day];
+  if (!list || !list.length) { customisePlannerDay(day); return; }
+  goToWorkout();               // navega para o ecrã de treino
+  loadPlannedWorkout(list);    // e carrega os exercícios planeados
+  setTimeout(() => { const el = document.getElementById('workout-session'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 100);
+}
+
 function openDayModal(day) {
   plannerSelectedDay = day;
   const profile = getProfile();
   plannerSelectedMuscles = [...(profile.weeklyPlan[day] || [])];
-  _plannerSelectedTemplate = (profile.weeklyTemplatePlan && profile.weeklyTemplatePlan[day]) || null;
+  _plannerSelectedTemplate = null;
+
+  // Carrega exercícios já planeados para o dia; se não houver mas há
+  // músculos, gera uma sugestão inicial automaticamente.
+  const saved = (profile.weeklyWorkoutPlan && profile.weeklyWorkoutPlan[day]) || null;
+  if (saved && saved.length) {
+    plannerExercises = saved.map(e => ({ name: e.name, muscle: e.muscle, sets: e.sets.map(s => ({ ...s })) }));
+  } else {
+    plannerExercises = [];
+    if (plannerSelectedMuscles.length) generatePlannerSuggestion();
+  }
 
   document.getElementById('modal-day-title').textContent = _dayFull(day);
   const chips = document.getElementById('modal-muscle-chips');
@@ -2019,8 +2096,127 @@ function openDayModal(day) {
     <div class="muscle-chip ${plannerSelectedMuscles.includes(m) ? 'selected' : ''}" onclick="togglePlannerMuscle(this, '${m}')">${tMuscle(m)}</div>
   `).join('');
 
-  renderPlannerTemplatePicker();
+  renderPlannerExercises();
   openModal('modal-day-muscles');
+}
+
+// Pool de exercícios disponíveis para um músculo (sem os que a lesão manda evitar)
+function _plannerPool(muscle, avoidSet, profile) {
+  const custom = (profile.customExercises || {})[muscle] || [];
+  return [...(EXERCISE_LIBRARY[muscle] || []), ...custom].filter(n => !avoidSet.has(n));
+}
+
+function _plannerAvoidSet() {
+  const hp = getHealthProfile();
+  return new Set(HEALTH_INJURIES.filter(i => hp.injuries.includes(i.id)).flatMap(i => i.avoid));
+}
+
+// (Re)gera a sugestão completa a partir dos músculos selecionados
+function generatePlannerSuggestion() {
+  const profile = getProfile();
+  if (!profile) { plannerExercises = []; return; }
+  const avoidSet = _plannerAvoidSet();
+  const perMuscle = plannerSelectedMuscles.length <= 2 ? 3 : 2;
+  const picked = [];
+  const used = new Set();
+  plannerSelectedMuscles.forEach(muscle => {
+    const pool = _plannerPool(muscle, avoidSet, profile);
+    let added = 0;
+    for (const name of pool) {
+      if (added >= perMuscle) break;
+      if (used.has(name)) continue;
+      used.add(name);
+      picked.push({ name, muscle, sets: [{ reps: 12, weight: 0 }] });
+      added++;
+    }
+  });
+  plannerExercises = profile.goal ? adaptExercisesToGoal(picked, profile.goal) : picked;
+}
+
+function regeneratePlannerSuggestion() {
+  if (!plannerSelectedMuscles.length) { showToast(t('plan_pick_muscles_first')); return; }
+  generatePlannerSuggestion();
+  renderPlannerExercises();
+}
+
+function swapPlannerExercise(i) {
+  const profile = getProfile();
+  const ex = plannerExercises[i];
+  if (!ex) return;
+  const avoidSet = _plannerAvoidSet();
+  const pool = _plannerPool(ex.muscle, avoidSet, profile);
+  const used = new Set(plannerExercises.map(e => e.name));
+  const alt = pool.find(n => !used.has(n));
+  if (!alt) { showToast(t('plan_no_more_alts')); return; }
+  plannerExercises[i] = { name: alt, muscle: ex.muscle, sets: ex.sets.map(s => ({ ...s })) };
+  renderPlannerExercises();
+}
+
+function removePlannerExercise(i) {
+  plannerExercises.splice(i, 1);
+  renderPlannerExercises();
+}
+
+// Adiciona mais um exercício para o músculo com menos exercícios na lista
+function addPlannerExercise() {
+  const profile = getProfile();
+  if (!plannerSelectedMuscles.length) { showToast(t('plan_pick_muscles_first')); return; }
+  const avoidSet = _plannerAvoidSet();
+  const used = new Set(plannerExercises.map(e => e.name));
+  // Ordena músculos pelo nº de exercícios já escolhidos (menos primeiro)
+  const counts = {};
+  plannerSelectedMuscles.forEach(m => counts[m] = 0);
+  plannerExercises.forEach(e => { if (counts[e.muscle] != null) counts[e.muscle]++; });
+  const ordered = [...plannerSelectedMuscles].sort((a, b) => counts[a] - counts[b]);
+  for (const muscle of ordered) {
+    const pool = _plannerPool(muscle, avoidSet, profile);
+    const next = pool.find(n => !used.has(n));
+    if (next) {
+      const base = { name: next, muscle, sets: [{ reps: 12, weight: 0 }] };
+      const adapted = profile.goal ? adaptExercisesToGoal([base], profile.goal)[0] : base;
+      plannerExercises.push(adapted);
+      renderPlannerExercises();
+      return;
+    }
+  }
+  showToast(t('plan_no_more_alts'));
+}
+
+function renderPlannerExercises() {
+  const el = document.getElementById('modal-day-exercises');
+  if (!el) return;
+
+  if (!plannerSelectedMuscles.length) {
+    el.innerHTML = `<div style="font-size:0.8rem;color:var(--muted);text-align:center;padding:8px 0;">${t('plan_pick_muscles_hint')}</div>`;
+    return;
+  }
+  if (!plannerExercises.length) {
+    el.innerHTML = `
+      <div style="text-align:center;padding:10px 0;">
+        <button onclick="regeneratePlannerSuggestion()" class="btn btn-secondary btn-sm">✨ ${t('plan_generate')}</button>
+      </div>`;
+    return;
+  }
+
+  const rows = plannerExercises.map((ex, i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--card);border:1px solid var(--border);border-radius:10px;margin-bottom:7px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ex.name}</div>
+        <div style="font-size:0.68rem;color:var(--muted);margin-top:1px;">${tMuscle(ex.muscle)} · ${ex.sets.length}×${ex.sets[0].reps}</div>
+      </div>
+      <button onclick="swapPlannerExercise(${i})" title="${t('plan_swap')}"
+        style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:5px 9px;">↻</button>
+      <button onclick="removePlannerExercise(${i})" title="${t('plan_remove')}"
+        style="background:rgba(255,71,87,.1);border:1px solid rgba(255,71,87,.2);border-radius:8px;color:#ff4757;cursor:pointer;font-size:0.85rem;padding:5px 9px;">✕</button>
+    </div>`).join('');
+
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+      <div style="font-size:0.75rem;color:var(--muted);font-weight:600;letter-spacing:0.05em;text-transform:uppercase;">${t('plan_suggested_workout')} (${plannerExercises.length})</div>
+      <button onclick="regeneratePlannerSuggestion()" style="background:none;border:none;color:var(--orange);font-size:0.72rem;font-weight:700;cursor:pointer;padding:0;">🔄 ${t('plan_new_suggestion')}</button>
+    </div>
+    ${rows}
+    <button onclick="addPlannerExercise()" class="btn btn-secondary btn-sm btn-full" style="margin-top:4px;">+ ${t('plan_add_exercise')}</button>`;
 }
 
 function renderPlannerTemplatePicker() {
@@ -2082,17 +2278,45 @@ function selectPlannerTemplate(id) {
 }
 
 function togglePlannerMuscle(el, muscle) {
+  const profile = getProfile();
   const idx = plannerSelectedMuscles.indexOf(muscle);
-  if (idx >= 0) { plannerSelectedMuscles.splice(idx, 1); el.classList.remove('selected'); }
-  else { plannerSelectedMuscles.push(muscle); el.classList.add('selected'); }
-  renderPlannerTemplatePicker();
+  if (idx >= 0) {
+    // Remove o músculo e os exercícios que lhe pertencem (preserva os restantes edits)
+    plannerSelectedMuscles.splice(idx, 1);
+    el.classList.remove('selected');
+    plannerExercises = plannerExercises.filter(e => e.muscle !== muscle);
+  } else {
+    // Adiciona o músculo e sugere alguns exercícios para ele
+    plannerSelectedMuscles.push(muscle);
+    el.classList.add('selected');
+    const avoidSet = _plannerAvoidSet();
+    const used = new Set(plannerExercises.map(e => e.name));
+    const pool = _plannerPool(muscle, avoidSet, profile);
+    let added = 0;
+    for (const name of pool) {
+      if (added >= 3) break;
+      if (used.has(name)) continue;
+      const base = { name, muscle, sets: [{ reps: 12, weight: 0 }] };
+      plannerExercises.push(profile.goal ? adaptExercisesToGoal([base], profile.goal)[0] : base);
+      added++;
+    }
+  }
+  renderPlannerExercises();
 }
 
 function saveDayMuscles() {
   const profile = getProfile();
   profile.weeklyPlan[plannerSelectedDay] = [...plannerSelectedMuscles];
-  profile.weeklyTemplatePlan = profile.weeklyTemplatePlan || {};
-  profile.weeklyTemplatePlan[plannerSelectedDay] = _plannerSelectedTemplate;
+  // Guarda a lista de exercícios editada para o dia
+  profile.weeklyWorkoutPlan = profile.weeklyWorkoutPlan || {};
+  if (plannerSelectedMuscles.length && plannerExercises.length) {
+    profile.weeklyWorkoutPlan[plannerSelectedDay] =
+      plannerExercises.map(e => ({ name: e.name, muscle: e.muscle, sets: e.sets.map(s => ({ ...s })) }));
+  } else {
+    delete profile.weeklyWorkoutPlan[plannerSelectedDay];
+  }
+  // Já não usamos template fixo por dia — limpa qualquer referência antiga
+  if (profile.weeklyTemplatePlan) profile.weeklyTemplatePlan[plannerSelectedDay] = null;
   saveProfile(profile);
   closeModal('modal-day-muscles');
   renderPlanner();

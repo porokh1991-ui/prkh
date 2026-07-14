@@ -20,6 +20,28 @@
   --shadow-float: 0 8px 40px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.3);
 }
 
+/* ═══════════════════════════════════════════
+   PERFORMANCE — fluidez tipo nativo (iPhone)
+   O empilhamento de dezenas de "backdrop-filter" por cima de um fundo
+   animado obrigava o browser a recalcular todos os vidros a cada frame,
+   o que derrubava os FPS no telemóvel. Aqui:
+   • removemos o blur dos elementos repetidos (cartões, inputs, botões…)
+     — sobre o fundo escuro ficam praticamente iguais mas quase de graça;
+   • paramos a animação contínua dos blobs de fundo (ficam estáticos);
+   • mantemos só UM vidro subtil e barato na barra de navegação.
+═══════════════════════════════════════════ */
+* { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+.blob { animation: none !important; }
+.bottom-nav {
+  backdrop-filter: blur(16px) saturate(150%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(150%) !important;
+}
+/* Scroll com inércia (momentum) como no iOS */
+html, body, .screen, .modal, [style*="overflow-y"] { -webkit-overflow-scrolling: touch; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 html { -webkit-text-size-adjust: 100%; }
 
@@ -46,7 +68,7 @@ body {
   position: absolute;
   border-radius: 50%;
   opacity: 0.08;
-  filter: blur(140px);
+  filter: blur(90px);
 }
 
 .blob-1 {
@@ -337,9 +359,7 @@ body {
    GLASS CARDS
 ═══════════════════════════════════════════ */
 .card {
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
   border-radius: var(--radius);
   padding: 16px;
   border: 1px solid var(--border);
@@ -357,9 +377,7 @@ body {
 }
 .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .stat-card {
-  background: rgba(255,255,255,0.04);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.05);
   border-radius: var(--radius);
   padding: 16px;
   border: 1px solid var(--border);
