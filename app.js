@@ -1517,6 +1517,27 @@ function renderDashboard() {
     btn.style.display = '';
   }
 
+  // Amanhã (atalho para planear)
+  const tmrCard = document.getElementById('dash-tomorrow-card');
+  if (tmrCard) {
+    const tomorrow = (dayOfWeek + 1) % 7;
+    const tomorrowMuscles = profile.weeklyPlan[tomorrow] || [];
+    tmrCard.innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;">
+        <div style="min-width:0;">
+          <div class="section-title" style="margin-bottom:4px;">${t('dash_tomorrow_title')} · ${_dayFull(tomorrow)}</div>
+          <div style="font-size:0.82rem;color:${tomorrowMuscles.length ? 'var(--text)' : 'var(--muted)'};overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+            ${tomorrowMuscles.length ? tomorrowMuscles.map(m => tMuscle(m)).join(', ') : t('plan_rest_day_msg')}
+          </div>
+        </div>
+        <button onclick="openDayModal(${tomorrow})"
+          style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange);
+                 border-radius:8px;padding:7px 13px;font-size:0.78rem;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+          ✏️ ${t('plan_edit_btn')}
+        </button>
+      </div>`;
+  }
+
   // Streak + água
   _updateStreakDashboard(profile);
   _updateWaterDashboard(profile);
@@ -1949,13 +1970,13 @@ function renderPlannerDetail(day) {
   const tomorrowBtnHtml = isToday ? `
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <div>
-        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">Amanhã · ${_dayFull(tomorrow)}</div>
+        <div style="font-size:0.68rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.05em;">${t('dash_tomorrow_title')} · ${_dayFull(tomorrow)}</div>
         <div style="font-size:0.78rem;margin-top:2px;">${tomorrowMuscles.length ? tomorrowMuscles.map(m => tMuscle(m)).join(', ') : t('plan_rest_day_msg')}</div>
       </div>
       <button onclick="openDayModal(${tomorrow})"
         style="background:rgba(255,107,53,0.1);border:1px solid rgba(255,107,53,0.3);color:var(--orange);
                border-radius:8px;padding:6px 12px;font-size:0.75rem;font-weight:700;cursor:pointer;white-space:nowrap;">
-        ✏️ Planear
+        ✏️ ${t('plan_edit_btn')}
       </button>
     </div>` : '';
 
@@ -3939,7 +3960,7 @@ function renderExerciseBrowser(profile) {
   // Search filter
   const searchInputId = 'ex-browser-search';
   const _prevFocusedId = document.activeElement?.id;
-  const currentSearch = (document.getElementById(searchInputId) || {}).value?.trim().toLowerCase() || '';
+  const currentSearch = ((document.getElementById(searchInputId) || {}).value || '').replace(/"/g, '&quot;');
 
   // Home mode: show banner if no equipment configured
   let homeBanner = '';
@@ -4454,8 +4475,8 @@ function renderWorkoutList() {
       const prBadge = getPRBadge(profile, ex.name, s.weight, s.reps);
       return `<tr>
         <td style="color:var(--muted);font-size:0.8rem;">${si + 1}</td>
-        <td><input type="number" value="${s.reps}" min="1" max="100" onchange="updateSet(${i},${si},'reps',+this.value)" placeholder="12"></td>
-        ${isHome ? '' : `<td><input type="number" value="${s.weight}" min="0" step="0.5" onchange="updateSet(${i},${si},'weight',+this.value)" placeholder="0"></td>`}
+        <td><input type="number" value="${s.reps}" min="1" max="100" oninput="updateSet(${i},${si},'reps',+this.value)" placeholder="12"></td>
+        ${isHome ? '' : `<td><input type="number" value="${s.weight}" min="0" step="0.5" oninput="updateSet(${i},${si},'weight',+this.value)" placeholder="0"></td>`}
         <td style="font-size:0.65rem;">${prBadge || hintIcon}</td>
         <td><button onclick="removeSet(${i},${si})" style="background:none;border:none;color:#ff4757;cursor:pointer;font-size:1rem;padding:2px 6px;">×</button></td>
       </tr>`;
@@ -4500,7 +4521,7 @@ function renderWorkoutList() {
         <div style="display:flex;align-items:center;gap:8px;margin:6px 0 8px;padding:7px 10px;background:rgba(255,255,255,0.04);border-radius:8px;">
           <span style="font-size:0.72rem;color:var(--muted);">${t('workout_weight_used')}</span>
           <input type="number" value="${ex.sets[0].weight || ''}" min="0" step="0.5" placeholder="0"
-            onchange="setExerciseWeight(${i},+this.value)"
+            oninput="setExerciseWeight(${i},+this.value)"
             style="width:62px;background:rgba(255,255,255,0.06);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 6px;font-size:0.88rem;font-weight:700;outline:none;text-align:center;">
           <span style="font-size:0.72rem;color:var(--muted);">kg</span>
           <span style="font-size:0.68rem;color:var(--muted);margin-left:2px;">${t('workout_all_series')}</span>
@@ -4603,7 +4624,6 @@ function updateSet(exIdx, setIdx, field, val) {
 
 function setExerciseWeight(exIdx, weight) {
   workoutExercises[exIdx].sets.forEach(s => s.weight = weight);
-  renderWorkoutList();
 }
 
 function addSetInline(exIdx) {
@@ -4640,9 +4660,9 @@ function renderSets() {
   document.getElementById('sets-list').innerHTML = tempSets.map((s, i) => `
     <div class="sets-row">
       <span style="color:var(--muted); width:24px; font-size:0.8rem;">${i+1}.</span>
-      <input type="number" value="${s.reps}" placeholder="Reps" onchange="tempSets[${i}].reps=+this.value" style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px;font-size:0.9rem;width:70px;text-align:center;">
+      <input type="number" value="${s.reps}" placeholder="Reps" oninput="tempSets[${i}].reps=+this.value" style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px;font-size:0.9rem;width:70px;text-align:center;">
       <span class="sep">reps ×</span>
-      <input type="number" value="${s.weight}" placeholder="kg" onchange="tempSets[${i}].weight=+this.value" style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px;font-size:0.9rem;width:70px;text-align:center;">
+      <input type="number" value="${s.weight}" placeholder="kg" oninput="tempSets[${i}].weight=+this.value" style="background:var(--card2);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text);padding:8px;font-size:0.9rem;width:70px;text-align:center;">
       <span class="sep">kg</span>
       <button onclick="tempSets.splice(${i},1);renderSets();" style="background:rgba(255,71,87,.2);color:#ff4757;border:none;border-radius:var(--radius-sm);padding:6px 10px;cursor:pointer;">✕</button>
     </div>
@@ -7167,27 +7187,3 @@ window.initAppAfterAuth = function() {
   }
 };
 
-// ─── Nav bar scroll-shrink (Instagram style) ──────────────────────
-(function() {
-  const nav = document.querySelector('.bottom-nav');
-  if (!nav) return;
-  let lastY = 0;
-  let shrunk = false;
-
-  function onScroll() {
-    const y = document.body.scrollTop || document.documentElement.scrollTop || window.scrollY;
-    const goingDown = y > lastY;
-    lastY = y;
-
-    if (goingDown && y > 60 && !shrunk) {
-      shrunk = true;
-      nav.classList.add('nav-shrunk');
-    } else if (!goingDown && shrunk) {
-      shrunk = false;
-      nav.classList.remove('nav-shrunk');
-    }
-  }
-
-  document.body.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('scroll', onScroll, { passive: true });
-})();

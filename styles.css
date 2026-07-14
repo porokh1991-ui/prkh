@@ -254,11 +254,6 @@ body {
   pointer-events: none;
   z-index: 0;
 }
-/* Encolher ao fazer scroll para baixo — scale sem alterar layout */
-.bottom-nav.nav-shrunk {
-  transform: translateX(-50%) scaleX(0.78) scaleY(0.82);
-}
-
 /* Indicador deslizante */
 .nav-indicator {
   position: absolute;
