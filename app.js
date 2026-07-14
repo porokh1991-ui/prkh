@@ -1289,14 +1289,6 @@ function renderProfileTab() {
         </div>
       </div>
 
-      <!-- Exportar dados -->
-      <div class="card" style="margin-bottom:14px;">
-        <div class="section-title" style="margin-bottom:4px;">${t('profile_export_section')}</div>
-        <div style="font-size:0.75rem;color:var(--muted);margin-bottom:12px;">${t('profile_export_desc')}</div>
-        <button class="btn btn-secondary btn-full" onclick="exportWorkoutCSV()">${t('profile_export_btn')}</button>
-      </div>
-
-
       <!-- Terminar sessão -->
       <div style="text-align:center;margin-top:6px;">
         <button onclick="fbLogout()" style="background:none;border:1px solid rgba(255,71,87,0.3);border-radius:20px;padding:8px 20px;color:rgba(255,71,87,0.7);font-size:0.8rem;cursor:pointer;">Terminar sessão</button>
@@ -2846,33 +2838,6 @@ function getAgeCategory(age) {
   return 'adult';
 }
 
-function renderAgeAdaptedWorkout(ageCategory) {
-  const el = document.getElementById('workout-age-banner');
-  if (!el) return;
-  if (ageCategory === 'adult') { el.innerHTML = ''; return; }
-
-  const isChild   = ageCategory === 'child';
-  const templates = isChild ? CHILD_TEMPLATES : ELDERLY_TEMPLATES;
-  const color     = isChild ? 'var(--pink)'  : 'var(--cyan)';
-  const bg        = isChild ? 'rgba(255,107,53,.08)' : 'rgba(0,170,255,.08)';
-  const title     = isChild ? t('workout_child_title') : t('workout_elderly_title');
-  const subtitle  = isChild ? t('workout_child_desc') : t('workout_elderly_desc');
-
-  el.innerHTML = `
-    <div style="background:${bg}; border:1.5px solid ${color}; border-radius:var(--radius-sm); padding:14px; margin-bottom:14px;">
-      <div style="font-size:0.72rem; color:${color}; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">${title}</div>
-      <div style="font-size:0.78rem; color:var(--muted); margin-bottom:12px;">${subtitle}</div>
-      <div style="display:flex; gap:8px; flex-wrap:wrap;">
-        ${templates.map(tpl2 => `
-          <div onclick="loadAgeTemplate('${tpl2.id}')"
-            style="padding:10px 14px; background:${activeTemplateId===tpl2.id ? bg : 'rgba(255,255,255,0.04)'}; border:1.5px solid ${activeTemplateId===tpl2.id ? color : 'var(--border)'}; border-radius:var(--radius-sm); cursor:pointer; transition:all .2s; flex:1; min-width:120px; text-align:center;">
-            <div style="font-size:0.85rem; font-weight:700; color:${activeTemplateId===tpl2.id ? color : 'var(--text)'};">${tpl2.label}</div>
-            <div style="font-size:0.7rem; color:var(--muted); margin-top:2px;">${tpl2.exercises.length} ${t('exercises_label')}</div>
-          </div>`).join('')}
-      </div>
-    </div>`;
-}
-
 function loadAgeTemplate(templateId) {
   const all = [...CHILD_TEMPLATES, ...ELDERLY_TEMPLATES];
   const tpl = all.find(t => t.id === templateId);
@@ -2882,8 +2847,7 @@ function loadAgeTemplate(templateId) {
   workoutExercises = tpl.exercises.map(e => ({ name:e.name, muscle:e.muscle, sets:e.sets.map(s=>({...s})) }));
   workoutSelectedMuscles = [...tpl.muscles];
   const profile = getProfile();
-  const age = profile ? profile.age : null;
-  renderAgeAdaptedWorkout(getAgeCategory(age));
+  renderWorkoutNotices();
   renderWorkoutTemplatePills();
   renderWorkoutMuscleChips(profile);
   renderExerciseBrowser(profile);
@@ -2891,339 +2855,6 @@ function loadAgeTemplate(templateId) {
   updateWorkoutSummary();
   setTimeout(() => { const el = document.getElementById('workout-session'); if (el) el.scrollIntoView({behavior:'smooth',block:'start'}); }, 100);
   showToast(`✔ ${tpl.label} ${t('t_loaded')}`);
-}
-
-// ═══════════════════════════════════════════════════════
-//  GROUP CLASSES
-// ═══════════════════════════════════════════════════════
-
-const GROUP_CLASSES = [
-  {
-    id: 'yoga',
-    name: 'Yoga',
-    icon: '🧘',
-    duration: '60 min',
-    intensity: 'Baixa',
-    intensityColor: '#00d4aa',
-    desc: 'Melhora flexibilidade, equilíbrio e bem-estar mental. Ideal para recuperação ativa.',
-    muscles: ['Costas', 'Ombros', 'Pernas', 'Abdômen'],
-    tip: 'Perfeito para fazer no dia a seguir a um treino intenso de pernas ou costas.',
-    risks: [
-      { ids: ['knee','meniscus','ligament_knee'], note: 'Algumas posturas exigem flexão profunda do joelho (ex: posição de lótus). Avisa o instrutor e adapta as posições.' },
-      { ids: ['back','disc','scoliosis'],         note: 'Certas posturas de flexão e torção da coluna podem agravar a lesão. Opta por versões modificadas e informa o instrutor.' },
-      { ids: ['shoulder','rotator_cuff'],         note: 'Posições de apoio nos braços (ex: prancha, cão olhando para baixo) podem sobrecarregar o ombro. Faz versões adaptadas.' },
-      { ids: ['wrist','carpal'],                  note: 'Muitas posturas de suporte de peso no pulso. Usa blocos de yoga para reduzir a extensão do pulso.' },
-    ]
-  },
-  {
-    id: 'pilates',
-    name: 'Pilates',
-    icon: '🤸',
-    duration: '50 min',
-    intensity: 'Baixa–Média',
-    intensityColor: '#00d4aa',
-    desc: 'Fortalece o core, melhora postura e estabilidade. Excelente complemento à musculação.',
-    muscles: ['Abdômen', 'Costas', 'Glúteos', 'Pernas'],
-    tip: 'Complementa treinos de força com estabilidade e postura.',
-    risks: [
-      { ids: ['neck'],                            note: 'Exercícios de flexão cervical (crunch com cabeça elevada) podem agravar a cervical. Mantém a cabeça apoiada.' },
-      { ids: ['back','disc'],                     note: 'Movimentos de flexão intensa da coluna devem ser evitados ou modificados. Informa o instrutor da tua situação.' },
-      { ids: ['wrist','carpal'],                  note: 'Exercícios em apoio de mãos no chão podem pressionar o pulso. Usa punhos fechados ou antebraços como apoio.' },
-      { ids: ['hip','groin'],                     note: 'Movimentos de abertura de perna e flexão da anca podem ser desconfortáveis. Reduz a amplitude de movimento.' },
-    ]
-  },
-  {
-    id: 'spinning',
-    name: 'Spinning',
-    icon: '🚴',
-    duration: '45 min',
-    intensity: 'Alta',
-    intensityColor: '#ff6b35',
-    desc: 'Cardio intenso em bicicleta estacionária. Queima muitas calorias e melhora a resistência.',
-    muscles: ['Pernas', 'Glúteos'],
-    tip: 'Complemento ideal para quem treina pernas ou quer acelerar o emagrecimento.',
-    risks: [
-      { ids: ['knee','meniscus','ligament_knee'], note: 'A pedalada repetitiva pode sobrecarregar o joelho. Regula bem a altura do selim e mantém cadência suave.' },
-      { ids: ['achilles','ankle','plantar'],      note: 'A posição do pé no pedal pode tensionar o tendão de Aquiles e a fáscia plantar. Evita resistências elevadas no início.' },
-      { ids: ['back','disc'],                     note: 'A postura inclinada pode pressionar a coluna lombar. Ajusta o guiador para uma posição mais ereta.' },
-      { ids: ['hip','groin'],                     note: 'A flexão repetida da anca pode irritar a articulação. Regula a altura do selim para não ultrapassar os 90° na pedalada.' },
-      { ids: ['shin_splints'],                    note: 'O impacto é baixo, mas altas cadências podem agravar a canelite. Mantém resistência moderada.' },
-    ]
-  },
-  {
-    id: 'bodypump',
-    name: 'Body Pump',
-    icon: '🏋️',
-    duration: '55 min',
-    intensity: 'Alta',
-    intensityColor: '#ff6b35',
-    desc: 'Treino de força com barra e halteres para todo o corpo ao ritmo da música.',
-    muscles: ['Peito', 'Costas', 'Pernas', 'Ombros', 'Bíceps', 'Tríceps'],
-    tip: 'Ótimo como treino alternativo ou em dias de volume total.',
-    risks: [
-      { ids: ['knee','meniscus','ligament_knee'], note: 'O bloco de agachamentos é muito exigente para o joelho. Reduz a amplitude ou substitui por exercícios de menor impacto.' },
-      { ids: ['back','disc','scoliosis'],         note: 'Agachamentos e peso morto com barra sobrecarregam a coluna. Usa cargas muito reduzidas ou omite esses blocos.' },
-      { ids: ['shoulder','rotator_cuff'],         note: 'O bloco de ombros com press overhead pode agravar a lesão. Opta por carga zero ou substitui por elevações laterais leves.' },
-      { ids: ['elbow','epicondylitis'],           note: 'Movimentos de curl e tríceps repetitivos com carga podem irritar o cotovelo. Usa carga mínima e amplitude reduzida.' },
-      { ids: ['wrist','carpal'],                  note: 'A pega na barra pode pressionar o pulso. Usa suportes de pulso e opta por halteres em vez de barra quando possível.' },
-      { ids: ['achilles','ankle','plantar'],      note: 'Blocos de pernas incluem elevações de gémeo e lunges. Comunica ao instrutor para adaptar esses exercícios.' },
-    ]
-  },
-  {
-    id: 'zumba',
-    name: 'Zumba',
-    icon: '💃',
-    duration: '60 min',
-    intensity: 'Média',
-    intensityColor: '#ffd700',
-    desc: 'Dança animada que queima calorias e melhora coordenação motora. Divertido e eficaz.',
-    muscles: ['Pernas', 'Glúteos', 'Abdômen'],
-    tip: 'Excelente cardio complementar para quem treina parte inferior.',
-    risks: [
-      { ids: ['knee','meniscus','ligament_knee'], note: 'Mudanças de direção rápidas e movimentos laterais são exigentes para o joelho. Evita as rotações bruscas.' },
-      { ids: ['ankle','achilles','plantar'],      note: 'Movimentos de salto e mudanças de apoio são frequentes. Usa calçado com boa amortização e evita saltar.' },
-      { ids: ['hip','groin'],                     note: 'Movimentos de anca e rotação lateral podem causar desconforto. Reduz a amplitude dos movimentos de dança.' },
-      { ids: ['shin_splints'],                    note: 'O impacto acumulado pode agravar a canelite. Opta por versões low-impact sem saltar.' },
-    ]
-  },
-  {
-    id: 'boxing',
-    name: 'Boxe Fitness',
-    icon: '🥊',
-    duration: '50 min',
-    intensity: 'Alta',
-    intensityColor: '#ff6b35',
-    desc: 'Técnica de boxe adaptada para fitness. Cardio intenso com treino de força funcional.',
-    muscles: ['Peito', 'Ombros', 'Bíceps', 'Tríceps', 'Abdômen'],
-    tip: 'Complementa treinos de parte superior com cardio e potência.',
-    risks: [
-      { ids: ['shoulder','rotator_cuff'],         note: 'Socos repetitivos com rotação do ombro são o cerne desta aula. Considera evitar até estares reabilitado.' },
-      { ids: ['elbow','epicondylitis'],           note: 'A extensão rápida do cotovelo nos socos pode agravar a epicondilite. Usa luvas e reduz a força de impacto.' },
-      { ids: ['wrist','carpal'],                  note: 'O impacto no saco de boxe transmite-se ao pulso. Usa ligaduras ou luvas com bom suporte de pulso.' },
-      { ids: ['ankle','achilles','knee'],         note: 'O footwork exige agilidade e mudanças de direção rápidas. Mantém os movimentos de pés simples e controlados.' },
-      { ids: ['neck'],                            note: 'Movimentos defensivos de esquiva podem tensionar a cervical. Faz-os de forma lenta e controlada.' },
-    ]
-  },
-  {
-    id: 'hiit',
-    name: 'HIIT',
-    icon: '🔥',
-    duration: '30 min',
-    intensity: 'Muito Alta',
-    intensityColor: '#e91e8c',
-    desc: 'Intervalos de alta intensidade. Máxima queima de calorias em pouco tempo.',
-    muscles: ['Pernas', 'Glúteos', 'Abdômen', 'Peito'],
-    tip: 'Perfeito para dias em que tens pouco tempo mas queres resultados máximos.',
-    risks: [
-      { ids: ['knee','meniscus','ligament_knee'], note: 'Saltos e mudanças rápidas de direção são muito exigentes para o joelho. Substitui por versões low-impact.' },
-      { ids: ['ankle','achilles','plantar','shin_splints'], note: 'Alto impacto no pé e tornozelo. Evita saltar e opta por exercícios sem impacto (mountain climbers, steps).' },
-      { ids: ['back','disc'],                     note: 'Exercícios como burpees e mountain climbers sobrecarregam a lombar. Omite-os e substitui por exercícios de core suave.' },
-      { ids: ['shoulder','rotator_cuff'],         note: 'Flexões e posições em prancha são comuns no HIIT. Usa joelhos como apoio e evita empurrar até à dor.' },
-      { ids: ['hip','groin'],                     note: 'Movimentos explosivos de perna como jumping jacks podem agravar a anca. Faz versões lentas e controladas.' },
-      { ids: ['osteoporosis'],                    note: 'O impacto elevado representa risco de fratura. Consulta o teu profissional de saúde ou exercício físico antes de participar.' },
-      { ids: ['fibromyalgia'],                    note: 'A intensidade muito alta pode causar agudização da dor. Opta por aulas de menor intensidade.' },
-    ]
-  },
-  {
-    id: 'bodybalance',
-    name: 'Body Balance',
-    icon: '⚖️',
-    duration: '55 min',
-    intensity: 'Baixa',
-    intensityColor: '#00d4aa',
-    desc: 'Combinação de Yoga, Tai Chi e Pilates. Relaxamento, equilíbrio e flexibilidade.',
-    muscles: ['Costas', 'Ombros', 'Abdômen', 'Pernas'],
-    tip: 'Ideal para dias de descanso ativo ou recuperação pós-treino intenso.',
-    risks: [
-      { ids: ['knee','hip'],                      note: 'Algumas posições de equilíbrio e agachamento suave podem ser desconfortáveis. Usa apoio de parede se necessário.' },
-      { ids: ['back','disc'],                     note: 'Sequências de Tai Chi e alongamentos da coluna devem ser feitos com amplitude reduzida se houver dor.' },
-      { ids: ['shoulder','rotator_cuff'],         note: 'Movimentos de braço amplos do Tai Chi podem sobrecarregar o ombro. Reduz a amplitude e o ritmo.' },
-    ]
-  },
-  {
-    id: 'crossfit',
-    name: 'CrossFit',
-    icon: '💪',
-    duration: '60 min',
-    intensity: 'Muito Alta',
-    intensityColor: '#e91e8c',
-    desc: 'Treino funcional de alta intensidade combinando força, cardio e ginástica.',
-    muscles: ['Peito', 'Costas', 'Pernas', 'Ombros', 'Glúteos'],
-    tip: 'Complementa a musculação com funcionalidade e resistência geral.',
-    risks: [
-      { ids: ['back','disc','scoliosis'],         note: 'Levantamentos olímpicos e movimentos de alta carga na coluna são centrais no CrossFit. Risco elevado — consulta o teu profissional de saúde ou exercício físico antes de participar.' },
-      { ids: ['knee','meniscus','ligament_knee'], note: 'Agachamentos profundos, box jumps e lunges são frequentes. Risco elevado para o joelho — informa o coach.' },
-      { ids: ['shoulder','rotator_cuff'],         note: 'Movimentos overhead com carga (clean & jerk, thruster) são muito exigentes para o ombro. Considera evitar até reabilitação completa.' },
-      { ids: ['wrist','carpal','elbow'],          note: 'Movimentos de suporte de peso (handstand, anéis) e puxadas sobrecarregam o pulso e cotovelo. Comunica ao coach.' },
-      { ids: ['achilles','ankle','plantar'],      note: 'Saltos (box jump, double-unders) são de alto impacto para o tendão de Aquiles e pé. Substitui por alternativas de baixo impacto.' },
-      { ids: ['osteoporosis','fibromyalgia'],     note: 'A intensidade e impacto do CrossFit representam risco significativo. Consulta o teu profissional de saúde ou exercício físico antes de participar.' },
-    ]
-  },
-  {
-    id: 'aquafitness',
-    name: 'Aquafitness',
-    icon: '🌊',
-    duration: '45 min',
-    intensity: 'Baixa–Média',
-    intensityColor: '#00aaff',
-    desc: 'Exercício na água. Baixo impacto articular, ideal para recuperação e mobilidade.',
-    muscles: ['Pernas', 'Glúteos', 'Costas', 'Abdômen'],
-    tip: 'Excelente para recuperação ativa sem stress nas articulações.',
-    risks: [
-      { ids: ['shoulder','rotator_cuff'],         note: 'Movimentos amplos de braço contra a resistência da água podem ser exigentes para o ombro. Reduz a amplitude.' },
-      { ids: ['neck'],                            note: 'Mantém a cabeça fora de água e evita movimentos bruscos do pescoço durante os exercícios.' },
-    ]
-  },
-];
-
-// Pregnancy safety for group classes (by trimester)
-const PREGNANCY_CLASS_AVOID = {
-  1: new Set(['hiit', 'crossfit']),
-  2: new Set(['hiit', 'crossfit', 'boxing']),
-  3: new Set(['hiit', 'crossfit', 'boxing', 'bodypump', 'spinning', 'zumba']),
-};
-const PREGNANCY_CLASS_SAFE = new Set(['yoga', 'pilates', 'aquafitness', 'bodybalance']);
-const PREGNANCY_CLASS_CAUTION = new Set(['bodypump', 'spinning', 'zumba', 'boxing']);
-
-let groupClassesShowAll = false;
-let groupClassesVisible = true;
-
-function toggleGroupClassesVisible() {
-  groupClassesVisible = !groupClassesVisible;
-  const el = document.getElementById('workout-group-classes');
-  const chevron = document.getElementById('group-classes-chevron');
-  if (el) el.style.display = groupClassesVisible ? '' : 'none';
-  if (chevron) chevron.style.transform = groupClassesVisible ? '' : 'rotate(-90deg)';
-}
-
-function toggleGroupClassesFilter() {
-  groupClassesShowAll = !groupClassesShowAll;
-  const btn = document.getElementById('btn-group-filter');
-  if (btn) btn.textContent = groupClassesShowAll ? t('workout_filter_rec') : t('workout_filter_all');
-  renderGroupClasses();
-}
-
-function toggleLikeClass(id) {
-  const profile = getProfile();
-  if (!profile.likedClasses) profile.likedClasses = [];
-  const idx = profile.likedClasses.indexOf(id);
-  if (idx >= 0) profile.likedClasses.splice(idx, 1);
-  else profile.likedClasses.push(id);
-  saveProfile(profile);
-  renderGroupClasses();
-}
-
-function _intensityLabel(raw) {
-  const map = { 'Baixa': 'intensity_low', 'Baixa–Média': 'intensity_med_low', 'Média': 'intensity_medium', 'Alta': 'intensity_high', 'Muito Alta': 'intensity_very_high' };
-  return map[raw] ? t(map[raw]) : raw;
-}
-
-function renderGroupClasses() {
-  const el = document.getElementById('workout-group-classes');
-  if (!el) return;
-  const profile = getProfile();
-  const liked = profile.likedClasses || [];
-  const activeMuscles = workoutSelectedMuscles.length ? workoutSelectedMuscles :
-    (profile.weeklyPlan[new Date().getDay()] || []);
-
-  const pregnant = isPregnant(profile);
-  const trimester = pregnant ? getPregnancyTrimester(profile) : 1;
-  const pregnancyAvoid = pregnant ? PREGNANCY_CLASS_AVOID[trimester] : new Set();
-
-  const scored = GROUP_CLASSES.map(c => ({
-    ...c,
-    isLiked: liked.includes(c.id),
-    matchCount: c.muscles.filter(m => activeMuscles.includes(m)).length,
-    isRecommended: c.muscles.some(m => activeMuscles.includes(m)) && !pregnancyAvoid.has(c.id),
-    pregnancyAvoid: pregnancyAvoid.has(c.id),
-    pregnancySafe: pregnant && PREGNANCY_CLASS_SAFE.has(c.id),
-    pregnancyCaution: pregnant && PREGNANCY_CLASS_CAUTION.has(c.id) && !pregnancyAvoid.has(c.id),
-  })).sort((a, b) => {
-    if (a.isLiked !== b.isLiked) return b.isLiked - a.isLiked;
-    if (pregnant) {
-      if (a.pregnancySafe !== b.pregnancySafe) return b.pregnancySafe - a.pregnancySafe;
-      if (a.pregnancyAvoid !== b.pregnancyAvoid) return a.pregnancyAvoid - b.pregnancyAvoid;
-    }
-    return b.matchCount - a.matchCount;
-  });
-
-  const toShow = groupClassesShowAll ? scored : scored.filter(c => c.isLiked || c.isRecommended || c.pregnancySafe || activeMuscles.length === 0).slice(0, 6);
-
-  if (!toShow.length) {
-    el.innerHTML = `<div style="text-align:center; padding:16px; color:var(--muted); font-size:0.85rem;">
-      ${t('workout_select_muscles_class')}
-    </div>`;
-    return;
-  }
-
-  // Build injury risk notes for each class based on the user's active injuries
-  const hp = getHealthProfile();
-  const userInjuryIds = new Set([
-    ...(hp.injuries || []),
-    // map custom injury names to IDs if they partially match known IDs (best effort)
-  ]);
-
-  el.innerHTML = toShow.map(c => {
-    // Collect relevant risk notes for this user
-    const riskNotes = (c.risks || [])
-      .filter(r => r.ids.some(id => userInjuryIds.has(id)))
-      .map(r => r.note);
-
-    const riskBanner = riskNotes.length
-      ? `<div style="background:rgba(255,71,87,.07); border:1px solid rgba(255,71,87,.3); border-radius:var(--radius-sm); padding:8px 10px; margin-top:6px;">
-          <div style="font-size:0.68rem; color:#ff4757; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px;">${t('class_risk_header')}</div>
-          ${riskNotes.map(n => `<div style="font-size:0.75rem; color:var(--text); line-height:1.5; margin-bottom:3px;">• ${n}</div>`).join('')}
-        </div>`
-      : '';
-
-    // Pregnancy warning banner
-    let pregnancyBannerHtml = '';
-    if (c.pregnancyAvoid) {
-      const pgMsg = trimester === 3 ? t('pg_avoid_t3') : t('pg_avoid_general');
-      pregnancyBannerHtml = `<div style="background:rgba(255,105,180,.07); border:1px solid rgba(255,105,180,.35); border-radius:var(--radius-sm); padding:8px 10px; margin-top:6px;">
-        <div style="font-size:0.68rem; color:#ff69b4; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;">${t('pg_avoid_header')}</div>
-        <div style="font-size:0.75rem; color:var(--text); line-height:1.45;">${pgMsg}</div>
-      </div>`;
-    } else if (c.pregnancyCaution) {
-      pregnancyBannerHtml = `<div style="background:rgba(255,193,7,.07); border:1px solid rgba(255,193,7,.35); border-radius:var(--radius-sm); padding:8px 10px; margin-top:6px;">
-        <div style="font-size:0.68rem; color:#ffc107; font-weight:800; text-transform:uppercase; letter-spacing:.5px; margin-bottom:3px;">${t('pg_caution_header')}</div>
-        <div style="font-size:0.75rem; color:var(--text); line-height:1.45;">${t('pg_caution_msg')}</div>
-      </div>`;
-    } else if (c.pregnancySafe) {
-      pregnancyBannerHtml = `<div style="background:rgba(255,105,180,.07); border:1px solid rgba(255,105,180,.25); border-radius:var(--radius-sm); padding:6px 10px; margin-top:6px;">
-        <div style="font-size:0.72rem; color:#ff69b4; font-weight:700;">${t('pg_safe_msg')}</div>
-      </div>`;
-    }
-
-    const borderColor = c.pregnancyAvoid ? 'rgba(255,105,180,.4)' : c.pregnancySafe ? 'rgba(255,105,180,.25)' : c.isRecommended ? 'rgba(255,107,53,.3)' : 'var(--border)';
-
-    return `
-    <div style="background:var(--card2); border:1px solid ${borderColor}; border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:10px; display:flex; gap:12px; align-items:flex-start; ${c.pregnancyAvoid ? 'opacity:0.7;' : ''}">
-      <div style="font-size:1.8rem; line-height:1; margin-top:2px;">${c.icon}</div>
-      <div style="flex:1; min-width:0;">
-        <div style="display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:4px;">
-          <span style="font-size:0.9rem; font-weight:800; color:var(--text);">${c.name}</span>
-          ${c.isRecommended ? `<span style="font-size:0.62rem; background:rgba(255,107,53,.15); color:var(--orange); border:1px solid rgba(255,107,53,.3); border-radius:20px; padding:1px 7px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;">${t('workout_recommended')}</span>` : ''}
-          ${c.pregnancySafe ? `<span style="font-size:0.62rem; background:rgba(255,105,180,.15); color:#ff69b4; border:1px solid rgba(255,105,180,.4); border-radius:20px; padding:1px 7px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;">${t('pg_badge_safe')}</span>` : ''}
-          ${c.pregnancyAvoid ? `<span style="font-size:0.62rem; background:rgba(255,105,180,.12); color:#ff69b4; border:1px solid rgba(255,105,180,.3); border-radius:20px; padding:1px 7px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;">${t('pg_badge_avoid')}</span>` : ''}
-          ${c.pregnancyCaution ? `<span style="font-size:0.62rem; background:rgba(255,193,7,.12); color:#ffc107; border:1px solid rgba(255,193,7,.3); border-radius:20px; padding:1px 7px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;">${t('pg_badge_caution')}</span>` : ''}
-          ${riskNotes.length ? `<span style="font-size:0.62rem; background:rgba(255,71,87,.12); color:#ff4757; border:1px solid rgba(255,71,87,.3); border-radius:20px; padding:1px 7px; font-weight:700; text-transform:uppercase; letter-spacing:.4px;">${t('workout_risk')}</span>` : ''}
-        </div>
-        <div style="display:flex; gap:8px; margin-bottom:6px; flex-wrap:wrap;">
-          <span style="font-size:0.72rem; color:${c.intensityColor}; font-weight:600;">● ${_intensityLabel(c.intensity)}</span>
-        </div>
-        <div style="font-size:0.8rem; color:var(--muted); line-height:1.45; margin-bottom:6px;">${t('class_'+c.id+'_desc') || c.desc}</div>
-        ${c.isRecommended && !c.pregnancyAvoid ? `<div style="font-size:0.75rem; color:var(--orange); font-style:italic;">💡 ${t('class_'+c.id+'_tip') || c.tip}</div>` : ''}
-        ${pregnancyBannerHtml}
-        ${riskBanner}
-      </div>
-      <button onclick="toggleLikeClass('${c.id}')"
-        style="background:none; border:none; font-size:1.3rem; cursor:pointer; padding:0; flex-shrink:0; line-height:1;"
-        title="${c.isLiked ? t('fav_remove') : t('fav_add')}">
-        ${c.isLiked ? '❤️' : '🤍'}
-      </button>
-    </div>`;
-  }).join('');
 }
 
 // Rotation: after doing X, suggest Y next
@@ -3825,21 +3456,97 @@ function buildSupersetMap(templateId, goal, exercises) {
   return map;
 }
 
-function renderGoalBanner() {
-  const el = document.getElementById('workout-goal-banner');
+// Bloco único e compacto com objetivo + avisos (gravidez, lesões, idade).
+// Substitui os 4 banners separados que antes se empilhavam no topo.
+function renderWorkoutNotices() {
+  const el = document.getElementById('workout-notices');
   if (!el) return;
   const profile = getProfile();
-  if (!profile || !profile.goal) { el.innerHTML = ''; return; }
-  const config = GOAL_WORKOUT_CONFIG[profile.goal];
-  if (!config) { el.innerHTML = ''; return; }
+  if (!profile) { el.innerHTML = ''; return; }
+
+  const rows = [];
+
+  // ── Objetivo (contexto do treino) ──
+  const gc = GOAL_WORKOUT_CONFIG[profile.goal];
+  if (gc) {
+    rows.push(`
+      <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;font-size:0.72rem;">
+        <span style="color:${gc.color};font-weight:800;">${gc.emoji} ${gc.label}</span>
+        <span style="color:var(--muted);">·&nbsp;${gc.technique}</span>
+        <span style="color:var(--muted);">·&nbsp;⏱ ${gc.rest}</span>
+      </div>`);
+  }
+
+  // ── Gravidez ──
+  if (isPregnant(profile)) {
+    const tr = getPregnancyTrimester(profile);
+    const trLabel = tr === 1 ? '1º' : tr === 2 ? '2º' : '3º';
+    rows.push(`
+      <div style="font-size:0.72rem;color:var(--muted);line-height:1.5;">
+        <span style="color:#ff69b4;font-weight:800;">🤰 Gravidez · ${trLabel} trimestre</span>
+        &nbsp;— evitar 🚫 · reduzir peso nos ⚠️
+      </div>`);
+  }
+
+  // ── Lesões activas ──
+  const hp = getHealthProfile();
+  const injuries = HEALTH_INJURIES.filter(i => hp.injuries.includes(i.id));
+  const customInjuries = hp.customInjuries || [];
+  if (injuries.length || customInjuries.length) {
+    const n = injuries.length + customInjuries.length;
+    rows.push(`
+      <details>
+        <summary style="cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:0.72rem;color:var(--orange);font-weight:800;user-select:none;">
+          <span>⚠️ Lesões activas (${n})</span>
+          <span style="font-size:0.62rem;color:var(--muted);font-weight:400;">ver detalhes ▾</span>
+        </summary>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:8px;">
+          ${injuries.map(i => `
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;">${i.icon} ${i.label}</div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;line-height:1.4;">${i.note}</div>
+              <div style="margin-top:4px;display:flex;flex-wrap:wrap;gap:4px;">
+                ${i.avoid.map(e => `<span style="font-size:0.64rem;color:#ff4757;border:1px solid rgba(255,71,87,.3);border-radius:20px;padding:1px 7px;">⚠ ${e}</span>`).join('')}
+              </div>
+            </div>`).join('')}
+          ${customInjuries.map(nm => `
+            <div>
+              <div style="font-size:0.8rem;font-weight:700;">🩹 ${nm}</div>
+              <div style="font-size:0.72rem;color:var(--muted);margin-top:2px;">${t('workout_consult')}</div>
+            </div>`).join('')}
+        </div>
+      </details>`);
+  }
+
+  // ── Idade (criança / idoso) — templates adaptados ──
+  const ageCat = getAgeCategory(profile.age);
+  if (ageCat !== 'adult') {
+    const isChild   = ageCat === 'child';
+    const templates = isChild ? CHILD_TEMPLATES : ELDERLY_TEMPLATES;
+    const color     = isChild ? 'var(--pink)' : 'var(--cyan)';
+    const title     = isChild ? t('workout_child_title') : t('workout_elderly_title');
+    const subtitle  = isChild ? t('workout_child_desc') : t('workout_elderly_desc');
+    rows.push(`
+      <div>
+        <div style="font-size:0.68rem;color:${color};font-weight:800;text-transform:uppercase;letter-spacing:.5px;">${title}</div>
+        <div style="font-size:0.72rem;color:var(--muted);margin:2px 0 8px;">${subtitle}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+          ${templates.map(tpl2 => `
+            <div onclick="loadAgeTemplate('${tpl2.id}')"
+              style="padding:7px 12px;background:${activeTemplateId===tpl2.id ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.03)'};border:1px solid ${activeTemplateId===tpl2.id ? color : 'var(--border)'};border-radius:9px;cursor:pointer;transition:all .2s;flex:1;min-width:110px;text-align:center;">
+              <div style="font-size:0.78rem;font-weight:700;color:${activeTemplateId===tpl2.id ? color : 'var(--text)'};">${tpl2.label}</div>
+              <div style="font-size:0.66rem;color:var(--muted);margin-top:1px;">${tpl2.exercises.length} ${t('exercises_label')}</div>
+            </div>`).join('')}
+        </div>
+      </div>`);
+  }
+
+  if (!rows.length) { el.innerHTML = ''; return; }
 
   el.innerHTML = `
-    <div style="display:flex; align-items:center; gap:8px; margin-bottom:10px; flex-wrap:wrap;">
-      <span style="font-size:0.75rem; color:${config.color}; font-weight:700;">${config.emoji} ${config.label}</span>
-      <span style="font-size:0.72rem; color:var(--muted);">·</span>
-      <span style="font-size:0.72rem; color:var(--muted);">${config.technique}</span>
-      <span style="font-size:0.72rem; color:var(--muted);">·</span>
-      <span style="font-size:0.72rem; color:var(--muted);">⏱ ${config.rest}</span>
+    <div style="background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:12px;
+                padding:11px 14px;margin-bottom:14px;">
+      ${rows.map((r, i) => `<div style="${i > 0 ? 'border-top:1px solid var(--border);margin-top:9px;padding-top:9px;' : ''}">${r}</div>`).join('')}
     </div>`;
 }
 
@@ -3861,16 +3568,12 @@ function renderWorkout() {
     workoutSelectedMuscles = planMuscles.length > 0 ? [...planMuscles] : [];
   }
 
-  renderGoalBanner();
-  renderPregnancyBanner();
-  renderInjuryWarning();
-  renderAgeAdaptedWorkout(getAgeCategory(profile.age));
+  renderWorkoutNotices();
   renderWorkoutTemplatePills();
   renderWorkoutMuscleChips(profile);
   renderExerciseBrowser(profile);
   renderWorkoutList();
   updateWorkoutSummary();
-  renderGroupClasses();
 }
 
 const MUSCLE_ICONS = {
@@ -3914,7 +3617,6 @@ function toggleWorkoutMuscle(muscle) {
   const profile = getProfile();
   renderWorkoutMuscleChips(profile);
   renderExerciseBrowser(profile);
-  renderGroupClasses();
 }
 
 function toggleExBrowser() {
@@ -5450,42 +5152,6 @@ function detectAllergens(text, userAllergies) {
   return found;
 }
 
-function renderInjuryWarning() {
-  const el = document.getElementById('workout-injury-warning');
-  if (!el) return;
-  const hp = getHealthProfile();
-  const injuries = HEALTH_INJURIES.filter(i => hp.injuries.includes(i.id));
-  const customInjuries = hp.customInjuries || [];
-  if (!injuries.length && !customInjuries.length) { el.innerHTML = ''; return; }
-
-  const allLabels = [
-    ...injuries.map(i => `${i.icon} ${i.label}`),
-    ...customInjuries.map(n => `🩹 ${n}`),
-  ];
-
-  el.innerHTML = `
-    <details style="margin-bottom:10px; border:1px solid rgba(255,107,53,.25); border-radius:var(--radius-sm); padding:8px 12px;">
-      <summary style="cursor:pointer; font-size:0.78rem; color:var(--orange); font-weight:700; list-style:none; display:flex; justify-content:space-between; align-items:center;">
-        <span>⚠️ Lesões activas (${allLabels.length})</span>
-        <span style="font-size:0.65rem; color:var(--muted); font-weight:400;">ver detalhes</span>
-      </summary>
-      <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px;">
-        ${injuries.map(i => `
-          <div>
-            <div style="font-size:0.82rem; font-weight:700;">${i.icon} ${i.label}</div>
-            <div style="font-size:0.75rem; color:var(--muted); margin-top:2px; line-height:1.4;">${i.note}</div>
-            <div style="margin-top:4px; display:flex; flex-wrap:wrap; gap:4px;">
-              ${i.avoid.map(e => `<span style="font-size:0.66rem; color:#ff4757; border:1px solid rgba(255,71,87,.3); border-radius:20px; padding:1px 7px;">⚠ ${e}</span>`).join('')}
-            </div>
-          </div>`).join('')}
-        ${customInjuries.map(n => `
-          <div>
-            <div style="font-size:0.82rem; font-weight:700;">🩹 ${n}</div>
-            <div style="font-size:0.75rem; color:var(--muted); margin-top:2px;">${t('workout_consult')}</div>
-          </div>`).join('')}
-      </div>
-    </details>`;
-}
 
 // ═══════════════════════════════════════════════════════
 //  NUTRITION
@@ -6762,24 +6428,6 @@ function getPregnancyWarning(exName, trimester) {
     };
   }
   return null;
-}
-
-function renderPregnancyBanner() {
-  const el = document.getElementById('workout-pregnancy-banner');
-  if (!el) return;
-  const profile = getProfile();
-  if (!isPregnant(profile)) { el.innerHTML = ''; return; }
-  const t = getPregnancyTrimester(profile);
-  const trimLabel = t === 1 ? '1º trimestre' : t === 2 ? '2º trimestre' : '3º trimestre';
-  el.innerHTML = `
-    <div style="background:rgba(255,182,193,0.08);border:1px solid rgba(255,182,193,0.3);
-                border-left:3px solid #ff69b4;border-radius:10px;padding:10px 14px;margin-bottom:12px;">
-      <div style="font-size:0.78rem;font-weight:800;color:#ff69b4;margin-bottom:4px;">🤰 Modo Gravidez Ativo — ${trimLabel}</div>
-      <div style="font-size:0.72rem;color:var(--muted);line-height:1.5;">
-        Exercícios marcados com 🚫 devem ser evitados. Os marcados com ⚠️ devem ser feitos com peso reduzido.
-        Consulta sempre o teu médico antes de treinar.
-      </div>
-    </div>`;
 }
 
 function togglePregnancy(checked) {

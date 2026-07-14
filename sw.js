@@ -1,4 +1,4 @@
-const CACHE_NAME = 'prkh-v28';
+const CACHE_NAME = 'prkh-v30';
 const CACHE_FILES = [
   './',
   './index.html',

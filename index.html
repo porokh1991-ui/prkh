@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
   <title>PRKH – Personal Trainer</title>
-  <link rel="stylesheet" href="styles.css?v=27">
+  <link rel="stylesheet" href="styles.css?v=30">
   <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#ff6b35">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -152,11 +152,8 @@
         </div>
       </div>
 
-      <!-- Info bar (objetivo + lesões) -->
-      <div id="workout-goal-banner"></div>
-      <div id="workout-pregnancy-banner"></div>
-      <div id="workout-injury-warning"></div>
-      <div id="workout-age-banner"></div>
+      <!-- Bloco único: objetivo + avisos (gravidez / lesões / idade) -->
+      <div id="workout-notices"></div>
 
       <!-- Mode toggle -->
       <div id="workout-mode-toggle" style="margin-bottom:12px;"></div>
@@ -184,21 +181,6 @@
         </div>
       </div>
 
-      <!-- Aulas de Grupo -->
-      <div style="margin-top:20px;" id="group-classes-section">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-          <button onclick="toggleGroupClassesVisible()" style="display:flex;align-items:center;gap:6px;background:none;border:none;cursor:pointer;padding:0;">
-            <span id="group-classes-chevron" style="font-size:0.75rem;color:var(--muted);transition:transform .2s;">▼</span>
-            <span data-i18n="workout_groups" style="font-size:0.8rem; font-weight:700; color:var(--text);">Aulas de Grupo</span>
-          </button>
-          <button onclick="toggleGroupClassesFilter()" id="btn-group-filter"
-            data-i18n="workout_filter_all"
-            style="font-size:0.75rem; color:var(--muted); background:none; border:none; cursor:pointer; padding:0; font-weight:600;">
-            Ver todas
-          </button>
-        </div>
-        <div id="workout-group-classes"></div>
-      </div>
     </div>
   </div>
 
@@ -631,7 +613,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="firebase.js?v=1"></script>
-<script src="app.js?v=28"></script>
+<script src="app.js?v=30"></script>
 <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
@@ -640,25 +622,32 @@
   }
 
   // Corrige o bug do Chrome/Android em que a barra de navegação fixa
-  // ("position:fixed; bottom:0") fica "presa" a meio do ecrã quando o
-  // teclado abre ou a barra de endereço do Chrome esconde/aparece.
-  // Reancora os elementos fixos ao fundo do viewport visível real.
+  // ficava "presa" a meio do ecrã quando o teclado abria. Em vez de a
+  // reposicionar por cálculo (frágil e dependente do scroll da barra de
+  // endereço), escondemos a barra enquanto há um campo de texto focado
+  // (= teclado aberto) e voltamos a mostrá-la quando o foco sai.
   (function () {
-    if (!window.visualViewport) return;
-    const vv = window.visualViewport;
-    let raf = null;
-    function reposition() {
-      raf = null;
-      const offset = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      document.documentElement.style.setProperty('--kb-offset', offset + 'px');
+    const nav = document.querySelector('.bottom-nav');
+    if (!nav) return;
+    function isTextField(el) {
+      if (!el) return false;
+      const tag = el.tagName;
+      if (tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      if (tag === 'INPUT') {
+        const skip = ['button', 'submit', 'checkbox', 'radio', 'range', 'color', 'file'];
+        return !skip.includes((el.type || 'text').toLowerCase());
+      }
+      return el.isContentEditable === true;
     }
-    function schedule() {
-      if (raf) return;
-      raf = requestAnimationFrame(reposition);
-    }
-    vv.addEventListener('resize', schedule);
-    vv.addEventListener('scroll', schedule);
-    reposition();
+    document.addEventListener('focusin', function (e) {
+      if (isTextField(e.target)) nav.classList.add('kb-open');
+    });
+    document.addEventListener('focusout', function () {
+      // Pequeno atraso: se o foco passar para outro campo, mantém escondida.
+      setTimeout(function () {
+        if (!isTextField(document.activeElement)) nav.classList.remove('kb-open');
+      }, 120);
+    });
   })();
 </script>
 </body>

@@ -211,7 +211,7 @@ body {
 ═══════════════════════════════════════════ */
 .bottom-nav {
   position: fixed;
-  bottom: calc(max(16px, env(safe-area-inset-bottom)) + var(--kb-offset, 0px));
+  bottom: max(16px, env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%) scaleX(1) scaleY(1);
   transform-origin: center bottom;
@@ -232,7 +232,14 @@ body {
   align-items: center;
   padding: 6px;
   z-index: 200;
-  transition: transform 0.38s cubic-bezier(.4,0,.2,1);
+  transition: transform 0.32s cubic-bezier(.4,0,.2,1), opacity 0.2s ease;
+}
+/* Esconde a barra enquanto o teclado está aberto (evita que fique
+   flutuante a meio do ecrã no Chrome/Android). */
+.bottom-nav.kb-open {
+  transform: translateX(-50%) translateY(160%);
+  opacity: 0;
+  pointer-events: none;
 }
 /* Linha especular no topo — reflexo de vidro */
 .bottom-nav::before {
