@@ -1925,12 +1925,18 @@ function renderPlannerDetail(day) {
     // Plano editado pelo utilizador para este dia
     const exRows = savedPlan.map(ex => {
       const isRisky = avoidSet.has(ex.name);
-      return `<div style="display:flex; align-items:center; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
-        <div>
+      return `<div style="display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.05);">
+        <div style="min-width:0;">
           <span style="font-size:0.82rem; font-weight:600; color:${isRisky ? '#ff4757' : 'var(--text)'};">${ex.name}</span>
           ${isRisky ? `<span style="font-size:0.65rem; color:#ff4757; background:rgba(255,71,87,.12); border:1px solid rgba(255,71,87,.3); border-radius:20px; padding:1px 6px; margin-left:5px;">${t('plan_injury_badge')}</span>` : ''}
         </div>
-        <span style="font-size:0.72rem; color:var(--muted);">${ex.sets.length} ${t('sets_label')} · ${ex.sets[0].reps} ${t('workout_reps')}</span>
+        <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+          <span style="font-size:0.72rem; color:var(--muted);">${ex.sets.length} ${t('sets_label')} · ${ex.sets[0].reps} ${t('workout_reps')}</span>
+          <a href="${ytUrl(ex.name)}" target="_blank" rel="noopener" title="${t('workout_see_video')}"
+            style="display:inline-flex;align-items:center;text-decoration:none;">
+            <svg width="18" height="13" viewBox="0 0 18 13" xmlns="http://www.w3.org/2000/svg"><rect width="18" height="13" rx="3" fill="#FF0000"/><polygon points="7,3 7,10 13,6.5" fill="#fff"/></svg>
+          </a>
+        </div>
       </div>`;
     }).join('');
     suggestionHTML = `
@@ -2204,6 +2210,10 @@ function renderPlannerExercises() {
         <div style="font-size:0.85rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${ex.name}</div>
         <div style="font-size:0.68rem;color:var(--muted);margin-top:1px;">${tMuscle(ex.muscle)} · ${ex.sets.length}×${ex.sets[0].reps}</div>
       </div>
+      <a href="${ytUrl(ex.name)}" target="_blank" rel="noopener" title="${t('workout_see_video')}"
+        style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;padding:6px 9px;">
+        <svg width="18" height="13" viewBox="0 0 18 13" xmlns="http://www.w3.org/2000/svg"><rect width="18" height="13" rx="3" fill="#FF0000"/><polygon points="7,3 7,10 13,6.5" fill="#fff"/></svg>
+      </a>
       <button onclick="swapPlannerExercise(${i})" title="${t('plan_swap')}"
         style="background:rgba(255,255,255,0.05);border:1px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:0.9rem;padding:5px 9px;">↻</button>
       <button onclick="removePlannerExercise(${i})" title="${t('plan_remove')}"
